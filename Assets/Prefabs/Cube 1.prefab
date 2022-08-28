@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8219067023153055552}
   - component: {fileID: 7265092739860523873}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Cube 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -111,5 +111,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cubeObj: {fileID: 8219067023153055615, guid: 9b0b5e348da7adf48a086e90f469fdbe, type: 3}
   cubeList:
-  - {fileID: 8219067023153055615, guid: 545ba17f9d8049c4db8aaca85c76862c, type: 3}
+  - {fileID: 0}
   - {fileID: 0}

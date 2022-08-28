@@ -6,11 +6,9 @@ using System.Reflection;
 
 public class MissingRefFinder : EditorWindow
 {
-    private List<GameObject> objectsWithMissingRef = new List<GameObject>();
+    private List<ObjectWithMissingRef> objectsWithMissingRef = new List<ObjectWithMissingRef>();
     private bool shouldCheckScene = false; // Проверять ли ссылки в объектах на сцене
     private bool shouldUpdateList = false;
-
-    private GameObject obj;
 
     [MenuItem("Tools/Missing references finder")]
     public static void ShowWindow()
@@ -30,6 +28,7 @@ public class MissingRefFinder : EditorWindow
         if (shouldUpdateList)
         {
             UpdateObjectList();
+            DrawObjectList();
         }
 
     }
@@ -39,66 +38,59 @@ public class MissingRefFinder : EditorWindow
         objectsWithMissingRef.Clear();
 
         string searchFolder = "Assets";
-        string[] paths = AssetDatabase.FindAssets("", new[] { searchFolder });
+        string filter = "";
+        string[] paths = AssetDatabase.FindAssets(filter, new[] { searchFolder });
         foreach (var path in paths)
         {
             GameObject obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(path), typeof(GameObject)) as GameObject;
             if (obj == null)
                 continue;
 
-            //Debug.Log(AssetDatabase.GUIDToAssetPath(path));
-            objectsWithMissingRef.Add(obj);
-            obj = EditorGUILayout.ObjectField(obj, typeof(GameObject), false) as GameObject;
-            CheckObjectComponents(obj);
-        }
-    }
+            var missingRefObj = new ObjectWithMissingRef(obj);
+            missingRefObj.FillObjectData();
 
-    private void CheckObjectComponents(GameObject obj)
-    {
-        //Component[] components = obj.GetComponents<Component>();
-        //BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic;
-        /* foreach (Component comp in components)
-         {
-             Debug.Log(comp.ToString());
-             foreach (PropertyInfo p in comp.GetType().GetProperties(flags))
-             {
-                 Debug.Log(p.ToString() + p.GetType().IsClass);
-             }
-         }*/
-
-        /* foreach (Component comp in components)
-         {
-            // Debug.Log(comp.ToString());
-             foreach (FieldInfo p in comp.GetType().GetFields(flags))
-             {
-                 if(p.Name == "cubeObj")
-                     Debug.Log(p.GetValue(p));
-             }
-         }*/
-
-        Component[] components = obj.GetComponents<Component>();
-        foreach (Component comp in components)
-        {
-            CheckComponentProperties(comp);
-        }
-    }
-
-    private void CheckComponentProperties(Component comp)
-    {
-        SerializedObject sGameObj = new SerializedObject(comp);
-        SerializedProperty sProp = sGameObj.GetIterator();
-        sProp.NextVisible(true);
-        while (sProp.NextVisible(true))
-        {
-            if (sProp.propertyType != SerializedPropertyType.ObjectReference)
-                continue;
-
-            if (sProp.objectReferenceInstanceIDValue != 0 && !sProp.objectReferenceValue)
+            if(missingRefObj.hasMissingRefs())
             {
-                Debug.Log(sProp.displayName);
+                objectsWithMissingRef.Add(missingRefObj);
             }
-            //Debug.Log(sProp.objectReferenceInstanceIDValue + " " + sProp.objectReferenceValue);
+
         }
     }
+
+    private void DrawObjectList()
+    {
+        GUILayout.BeginVertical();
+        foreach (var obj in objectsWithMissingRef)
+        {
+            DrawListElem(obj);
+        }
+        GUILayout.EndVertical();
+    }
+
+    private void DrawListElem(ObjectWithMissingRef obj)
+    {
+        GUILayout.BeginVertical();
+
+        EditorGUILayout.ObjectField(obj.gameObj, typeof(GameObject), false);
+        
+        GUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("Prefab");
+        EditorGUILayout.LabelField("Missing References");
+        GUILayout.EndHorizontal();
+
+        foreach (var comp in obj.componentsWitMissingRef)
+        {
+            foreach(var missingRef in comp.missingRefs)
+            {
+                GUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(comp.name);
+                EditorGUILayout.LabelField(missingRef);
+                GUILayout.EndHorizontal();
+            }
+        }
+
+        GUILayout.EndVertical();
+    }
+
 
 }
