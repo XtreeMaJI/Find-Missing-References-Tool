@@ -2,13 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using System.Reflection;
+using UnityEditor.SceneManagement;
 
 public class MissingRefFinder : EditorWindow
 {
     private List<ObjectWithMissingRef> objectsWithMissingRef = new List<ObjectWithMissingRef>();
-    private bool shouldCheckScene = false; // Проверять ли ссылки в объектах на сцене
-    private bool shouldUpdateList = false;
+    private bool shouldCheckScenes = false; // Проверять ли ссылки в объектах на сцене
 
     public Vector2 scrollPos = new Vector2();
 
@@ -20,35 +19,55 @@ public class MissingRefFinder : EditorWindow
 
     private void OnGUI()
     {
-        shouldCheckScene = EditorGUILayout.Toggle("Should check references in objects from scene?", shouldCheckScene);
+        shouldCheckScenes = EditorGUILayout.Toggle("Should check references in objects from scenes?", shouldCheckScenes);
 
         if (GUILayout.Button("Find Misssing References"))
         {
-            shouldUpdateList = true;
+            UpdateObjectList();
         }
 
-        if (shouldUpdateList)
-        {
-            UpdateObjectList();
-            DrawObjectList();
-        }
-        
+        DrawObjectList();
+
     }
 
     private void UpdateObjectList()
     {
         objectsWithMissingRef.Clear();
+        List<string> pathsToScenes = new List<string>();
 
         string searchFolder = "Assets";
         string filter = "";
         string[] paths = AssetDatabase.FindAssets(filter, new[] { searchFolder });
         foreach (var path in paths)
         {
+            SceneAsset asset = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(path), typeof(SceneAsset)) as SceneAsset;
+            if (asset)
+                pathsToScenes.Add(AssetDatabase.GUIDToAssetPath(path));
+
             GameObject obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(path), typeof(GameObject)) as GameObject;
             if (obj == null)
                 continue;
 
-            //Добавляем объект в список обектов с пропущенными ссылками, если таковые у него есть
+            //Добавляем объект в список обектов с отсутствующими ссылками, если таковые у него есть
+            TryAddObjToList(obj);
+        }
+
+        if(shouldCheckScenes)
+        {
+            foreach(string scenePath in pathsToScenes)
+            {
+                EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
+                CheckObjectsFromScene();
+            }
+        }
+
+    }
+
+    private void CheckObjectsFromScene()
+    {
+        List<GameObject> objects = new List<GameObject>(FindObjectsOfType<GameObject>());
+        foreach(GameObject obj in objects)
+        {
             TryAddObjToList(obj);
         }
     }
@@ -93,7 +112,7 @@ public class MissingRefFinder : EditorWindow
 
         GUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Component", EditorStyles.boldLabel);
-        EditorGUILayout.LabelField("Missing References", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Missing Reference", EditorStyles.boldLabel);
         GUILayout.EndHorizontal();
 
         foreach (var comp in obj.componentsWitMissingRef)
@@ -128,4 +147,5 @@ public class MissingRefFinder : EditorWindow
             parent = parent.transform.parent;
         }   
     }
+
 }

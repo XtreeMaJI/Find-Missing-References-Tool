@@ -54,7 +54,6 @@ public class ObjectWithMissingRef
         string compName = comp.GetType().Name;
         SerializedObject serializedComp = new SerializedObject(comp);
         SerializedProperty prop = serializedComp.GetIterator();
-        prop.NextVisible(true);
         while (prop.NextVisible(true))
         {
             if (prop.propertyType != SerializedPropertyType.ObjectReference)
