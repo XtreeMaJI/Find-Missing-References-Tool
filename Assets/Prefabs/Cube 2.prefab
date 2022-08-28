@@ -67,8 +67,7 @@ MeshRenderer:
     firstSubMesh: 0
     subMeshCount: 0
   m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 8219067023153055555, guid: 9b0b5e348da7adf48a086e90f469fdbe,
-    type: 3}
+  m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
   m_ReceiveGI: 1
@@ -110,9 +109,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d84d6edd07c1b438134bb572327b5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cubeObj: {fileID: 8219067023153055615, guid: 9b0b5e348da7adf48a086e90f469fdbe, type: 3}
+  cubeObj: {fileID: 0}
   cubeList:
-  - {fileID: 8219067023153055615, guid: 545ba17f9d8049c4db8aaca85c76862c, type: 3}
+  - {fileID: 0}
   - {fileID: 0}
 --- !u!1001 &4817294497477361637
 PrefabInstance:
@@ -121,6 +120,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 738140430236496586}
     m_Modifications:
+    - target: {fileID: 7265092739860523873, guid: 80f2826efa7122546b639ec10639cb34,
+        type: 3}
+      propertyPath: cubeObj
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7265092739860523873, guid: 80f2826efa7122546b639ec10639cb34,
+        type: 3}
+      propertyPath: cubeList.Array.data[0]
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 8219067023153055555, guid: 80f2826efa7122546b639ec10639cb34,
         type: 3}
       propertyPath: m_RootOrder
@@ -179,7 +188,7 @@ PrefabInstance:
     - target: {fileID: 8219067023153055615, guid: 80f2826efa7122546b639ec10639cb34,
         type: 3}
       propertyPath: m_Name
-      value: asdf
+      value: Cube2 child
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 80f2826efa7122546b639ec10639cb34, type: 3}

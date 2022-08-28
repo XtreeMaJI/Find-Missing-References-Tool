@@ -66,7 +66,7 @@ MeshRenderer:
     firstSubMesh: 0
     subMeshCount: 0
   m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 8219067023153055555, guid: 9b0b5e348da7adf48a086e90f469fdbe,
+  m_ProbeAnchor: {fileID: 8219067023153055555, guid: 35fb37a94ef25e84ca2c53881c773e9b,
     type: 3}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
@@ -91,7 +91,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8219067023153055615}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: b52fe77c5269d6c4aa928eb2750cea4e, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -109,7 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d84d6edd07c1b438134bb572327b5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cubeObj: {fileID: 8219067023153055615, guid: 9b0b5e348da7adf48a086e90f469fdbe, type: 3}
+  cubeObj: {fileID: 8219067023153055615, guid: 35fb37a94ef25e84ca2c53881c773e9b, type: 3}
   cubeList:
-  - {fileID: 8219067023153055615, guid: 545ba17f9d8049c4db8aaca85c76862c, type: 3}
+  - {fileID: 8219067023153055615, guid: 35fb37a94ef25e84ca2c53881c773e9b, type: 3}
   - {fileID: 0}

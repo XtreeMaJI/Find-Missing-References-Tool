@@ -6,10 +6,25 @@ using UnityEditor.SceneManagement;
 
 public class MissingRefFinder : EditorWindow
 {
+    class SceneInProject
+    {
+        public string path;
+        public string name;
+        public bool shouldCheck;
+        public SceneInProject(string newPath, string newName, bool flagShouldCheck)
+        {
+            path = newPath;
+            name = newName;
+            shouldCheck = flagShouldCheck;
+        }
+    }
+
     private List<ObjectWithMissingRef> objectsWithMissingRef = new List<ObjectWithMissingRef>();
     private bool shouldCheckScenes = false; // Проверять ли ссылки в объектах на сцене
 
     public Vector2 scrollPos = new Vector2();
+
+    private List<SceneInProject> scenesInProject = new List<SceneInProject>();
 
     [MenuItem("Tools/Missing references finder")]
     public static void ShowWindow()
@@ -17,9 +32,14 @@ public class MissingRefFinder : EditorWindow
         GetWindow<MissingRefFinder>();
     }
 
+    private void OnEnable()
+    {
+        UpdateScenesList();
+    }
+
     private void OnGUI()
     {
-        shouldCheckScenes = EditorGUILayout.Toggle("Should check references in objects from scenes?", shouldCheckScenes);
+        DrawScenesList();
 
         if (GUILayout.Button("Find Misssing References"))
         {
@@ -33,17 +53,12 @@ public class MissingRefFinder : EditorWindow
     private void UpdateObjectList()
     {
         objectsWithMissingRef.Clear();
-        List<string> pathsToScenes = new List<string>();
 
         string searchFolder = "Assets";
         string filter = "";
         string[] paths = AssetDatabase.FindAssets(filter, new[] { searchFolder });
         foreach (var path in paths)
         {
-            SceneAsset asset = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(path), typeof(SceneAsset)) as SceneAsset;
-            if (asset)
-                pathsToScenes.Add(AssetDatabase.GUIDToAssetPath(path));
-
             GameObject obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(path), typeof(GameObject)) as GameObject;
             if (obj == null)
                 continue;
@@ -52,15 +67,7 @@ public class MissingRefFinder : EditorWindow
             TryAddObjToList(obj);
         }
 
-        if(shouldCheckScenes)
-        {
-            foreach(string scenePath in pathsToScenes)
-            {
-                EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
-                CheckObjectsFromScene();
-            }
-        }
-
+        CheckObjectsFromSelectedScenes();
     }
 
     private void CheckObjectsFromScene()
@@ -114,7 +121,7 @@ public class MissingRefFinder : EditorWindow
         EditorGUILayout.Space(20);
         EditorGUILayout.LabelField("Object with missing reference", EditorStyles.boldLabel);
         EditorGUILayout.ObjectField(obj.gameObj, typeof(GameObject), false);
-        //Для объектов, являющихся дочерними префабами
+        //Для объектов, являющихся дочерними
         ShowParentsChain(obj.gameObj);
 
         GUILayout.BeginHorizontal();
@@ -153,6 +160,61 @@ public class MissingRefFinder : EditorWindow
             EditorGUILayout.ObjectField(parent.gameObject, typeof(GameObject), false);
             parent = parent.transform.parent;
         }   
+    }
+
+    private void UpdateScenesList()
+    {
+        scenesInProject.Clear();
+        string searchFolder = "Assets";
+        string filter = "";
+        string[] paths = AssetDatabase.FindAssets(filter, new[] { searchFolder });
+        foreach (var path in paths)
+        {
+            SceneAsset asset = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(path), typeof(SceneAsset)) as SceneAsset;
+            if (asset)
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(path);
+                SceneInProject scene = new SceneInProject(assetPath, asset.name, false);
+                scenesInProject.Add(scene);
+            }
+        }
+    }
+
+    private void DrawScenesList()
+    {
+        EditorGUILayout.LabelField("Scenes To Check");
+        foreach(var scene in scenesInProject)
+            scene.shouldCheck = EditorGUILayout.Toggle(scene.name, scene.shouldCheck);
+    }
+
+    private void CheckObjectsFromSelectedScenes()
+    {
+        bool shouldCheckScenes = false;
+
+        //Открываем отмеченные сцены
+        foreach (var scene in scenesInProject)
+        {
+            if (!scene.shouldCheck)
+            {
+                continue;
+            }
+
+            EditorSceneManager.OpenScene(scene.path, OpenSceneMode.Additive);
+            shouldCheckScenes = true;
+        }
+
+        //Закрываем лишние
+        foreach (var scene in scenesInProject)
+        {
+            if (!scene.shouldCheck && EditorSceneManager.sceneCount > 1)
+            {
+                EditorSceneManager.CloseScene(EditorSceneManager.GetSceneByName(scene.name), true);
+                continue;
+            }
+        }
+
+        if (shouldCheckScenes)
+            CheckObjectsFromScene();
     }
 
 }
