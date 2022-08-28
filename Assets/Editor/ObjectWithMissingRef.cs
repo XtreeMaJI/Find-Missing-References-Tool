@@ -51,6 +51,12 @@ public class ObjectWithMissingRef
 
     private void FindComponentMissingProperties(Component comp)
     {
+        if (!comp)
+        {
+            AddMissingRefToComponent("Missing Component", "");
+            return;
+        }
+
         string compName = comp.GetType().Name;
         SerializedObject serializedComp = new SerializedObject(comp);
         SerializedProperty prop = serializedComp.GetIterator();
