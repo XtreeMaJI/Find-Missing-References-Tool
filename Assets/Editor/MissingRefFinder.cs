@@ -20,8 +20,6 @@ public class MissingRefFinder : EditorWindow
     }
 
     private List<ObjectWithMissingRef> objectsWithMissingRef = new List<ObjectWithMissingRef>();
-    private bool shouldCheckScenes = false; // Проверять ли ссылки в объектах на сцене
-
     public Vector2 scrollPos = new Vector2();
 
     private List<SceneInProject> scenesInProject = new List<SceneInProject>();
