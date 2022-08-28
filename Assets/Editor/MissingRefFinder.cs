@@ -74,6 +74,13 @@ public class MissingRefFinder : EditorWindow
 
     private void TryAddObjToList(GameObject obj)
     {
+        //Если объект уже в списке, то не проверяем его
+        foreach(ObjectWithMissingRef elem in objectsWithMissingRef)
+        {
+            if (elem.gameObj == obj)
+                return;
+        }
+
         var missingRefObj = new ObjectWithMissingRef(obj);
         missingRefObj.FillObjectData();
 
