@@ -125,8 +125,8 @@ public class MissingRefFinder : EditorWindow
         ShowParentsChain(obj.gameObj);
 
         GUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Component", EditorStyles.boldLabel);
         EditorGUILayout.LabelField("Missing Reference", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("In component", EditorStyles.boldLabel);
         GUILayout.EndHorizontal();
 
         foreach (var comp in obj.componentsWitMissingRef)
@@ -134,8 +134,8 @@ public class MissingRefFinder : EditorWindow
             foreach(var missingRef in comp.missingRefs)
             {
                 GUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField(comp.name);
                 EditorGUILayout.LabelField(missingRef);
+                EditorGUILayout.LabelField(comp.name);
                 GUILayout.EndHorizontal();
             }
         }
