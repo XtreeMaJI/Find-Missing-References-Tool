@@ -10,6 +10,8 @@ public class MissingRefFinder : EditorWindow
     private bool shouldCheckScene = false; // Проверять ли ссылки в объектах на сцене
     private bool shouldUpdateList = false;
 
+    public Vector2 scrollPos = new Vector2();
+
     [MenuItem("Tools/Missing references finder")]
     public static void ShowWindow()
     {
@@ -30,7 +32,7 @@ public class MissingRefFinder : EditorWindow
             UpdateObjectList();
             DrawObjectList();
         }
-
+        
     }
 
     private void UpdateObjectList()
@@ -46,36 +48,52 @@ public class MissingRefFinder : EditorWindow
             if (obj == null)
                 continue;
 
-            var missingRefObj = new ObjectWithMissingRef(obj);
-            missingRefObj.FillObjectData();
+            //Добавляем объект в список обектов с пропущенными ссылками, если таковые у него есть
+            TryAddObjToList(obj);
+        }
+    }
 
-            if(missingRefObj.hasMissingRefs())
-            {
-                objectsWithMissingRef.Add(missingRefObj);
-            }
+    private void TryAddObjToList(GameObject obj)
+    {
+        var missingRefObj = new ObjectWithMissingRef(obj);
+        missingRefObj.FillObjectData();
 
+        if (missingRefObj.hasMissingRefs())
+        {
+            objectsWithMissingRef.Add(missingRefObj);
+        }
+
+        foreach(Transform child in obj.transform)
+        {
+            TryAddObjToList(child.gameObject);
         }
     }
 
     private void DrawObjectList()
     {
         GUILayout.BeginVertical();
+        scrollPos = GUILayout.BeginScrollView(scrollPos);
         foreach (var obj in objectsWithMissingRef)
         {
-            DrawListElem(obj);
+            DrawElemFromList(obj);
         }
+        GUILayout.EndScrollView();
         GUILayout.EndVertical();
     }
 
-    private void DrawListElem(ObjectWithMissingRef obj)
+    private void DrawElemFromList(ObjectWithMissingRef obj)
     {
         GUILayout.BeginVertical();
 
+        EditorGUILayout.Space(20);
+        EditorGUILayout.LabelField("Object with missing reference", EditorStyles.boldLabel);
         EditorGUILayout.ObjectField(obj.gameObj, typeof(GameObject), false);
-        
+        //Для объектов, являющихся дочерними префабами
+        ShowParentsChain(obj.gameObj);
+
         GUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Prefab");
-        EditorGUILayout.LabelField("Missing References");
+        EditorGUILayout.LabelField("Component", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Missing References", EditorStyles.boldLabel);
         GUILayout.EndHorizontal();
 
         foreach (var comp in obj.componentsWitMissingRef)
@@ -92,5 +110,22 @@ public class MissingRefFinder : EditorWindow
         GUILayout.EndVertical();
     }
 
+    private void ShowParentsChain(GameObject obj)
+    {
+        if (!obj)
+            return;
 
+        Transform parent = obj.transform.parent;
+
+        if (!parent)
+            return;
+
+        EditorGUILayout.LabelField("Located in");
+
+        while (parent)
+        {
+            EditorGUILayout.ObjectField(parent.gameObject, typeof(GameObject), false);
+            parent = parent.transform.parent;
+        }   
+    }
 }
